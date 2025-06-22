@@ -1,13 +1,39 @@
-from telegram import Update
-from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes
-import os
+import urllib.request
+import urllib.parse
+import json
+import time
 
-BOT_TOKEN = "7808674214:AAFzx0mRxBdUPv4Xnf8tW-dT-tPPVLIyayk" # Will get from Railway environment variables
+TOKEN = "7808674214:AAFzx0mRxBdUPv4Xnf8tW-dT-tPPVLIyayk"
+API_URL = f"https://api.telegram.org/bot{TOKEN}/"
 
-async def alive(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text("I am alive!")
+def get_updates(offset=None):
+    url = f"{API_URL}getUpdates?timeout=100"
+    if offset is not None:
+        url += f"&offset={offset}"
+    with urllib.request.urlopen(url) as response:
+        return json.loads(response.read()).get("result", [])
+
+def send_message(chat_id, text):
+    encoded_text = urllib.parse.quote(text)
+    url = f"{API_URL}sendMessage?chat_id={chat_id}&text={encoded_text}"
+    with urllib.request.urlopen(url):
+        pass  # No response handling needed here
+
+def main():
+    print("🤖 Telegram bot started (Python 3.12 style)")
+    offset = None
+    while True:
+        updates = get_updates(offset)
+        for update in updates:
+            message = update.get("message", {})
+            chat_id = message.get("chat", {}).get("id")
+            text = message.get("text", "")
+
+            if chat_id and text:
+                print(f"Received from user: {text}")
+                send_message(chat_id, "I am alive")
+                offset = update["update_id"] + 1
+        time.sleep(1)
 
 if __name__ == "__main__":
-    app = ApplicationBuilder().token(BOT_TOKEN).build()
-    app.add_handler(CommandHandler("alive", alive))
-    app.run_polling()
+    main()

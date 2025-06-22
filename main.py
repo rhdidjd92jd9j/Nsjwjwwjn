@@ -2,7 +2,7 @@ from telegram import Update
 from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes
 import os
 
-BOT_TOKEN = os.getenv("BOT_TOKEN")  # Will get from Railway environment variables
+BOT_TOKEN = "7808674214:AAFzx0mRxBdUPv4Xnf8tW-dT-tPPVLIyayk" # Will get from Railway environment variables
 
 async def alive(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text("I am alive!")
